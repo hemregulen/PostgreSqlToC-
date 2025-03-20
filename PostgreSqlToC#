@@ -1,0 +1,33 @@
+SELECT 'public ' ||
+  case
+    when data_type = 'uuid' THEN 'Guid'
+    when data_type = 'text' then 'string'
+    when data_type = 'json' then 'string'
+    when data_type = 'integer' then 'int'
+    when data_type = 'boolean' then 'bool'
+    when data_type = 'bigint' then 'long'
+    when data_type = 'timestamp with time zone' then 'DateTimeOffset'
+    when data_type = 'timestamp without time zone' then 'DateTime'
+		when data_type = 'money' then 'decimal'
+    when data_type = 'numeric' then 'decimal'
+    when data_type = 'jsonb' then 'string'
+      when data_type = 'real' then 'float'
+    when data_type = 'ARRAY' then
+        (case when udt_name = '_text' then 'string'
+            when udt_name = '_uuid' then 'Guid'
+            when udt_name = '_int4' then 'int'
+         else data_type end)
+                                                                     || '[]'
+    else data_type
+    end
+  ||
+  case
+    when is_nullable = 'YES' and (data_type = 'uuid' or data_type = 'integer' or data_type = 'boolean' or data_type = 'timestamp with time zone' or data_type = 'numeric' or data_type = 'real') THEN '?'
+    else '' end
+  ||
+  ' ' || column_name || ' { get; set; } '
+
+  as sql
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name   = 'enterprisecontactmetadata';
